@@ -1,0 +1,22 @@
+# OPTIONAL. Apply this only if you don't already have a cert-manager
+# ClusterIssuer and want one for Let's Encrypt.
+#
+# Prereq: cert-manager installed cluster-wide. If you need to install it:
+#   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
+#
+# Then edit the email below and apply this file.
+
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: REPLACE_ME@example.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - http01:
+          ingress:
+            class: nginx

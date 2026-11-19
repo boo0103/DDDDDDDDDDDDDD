@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: paymentalerts-backend
+  namespace: paymentalerts
+  labels:
+    app: paymentalerts-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: paymentalerts-backend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP

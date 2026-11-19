@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentalerts-backend
+  namespace: paymentalerts
+  labels:
+    app: paymentalerts-backend
+spec:
+  replicas: 1
+  # Recreate (not RollingUpdate) because the private key + store PVC are
+  # single-writer; a rolling update would briefly run two pods against them.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: paymentalerts-backend
+  template:
+    metadata:
+      labels:
+        app: paymentalerts-backend
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: backend
+          # EDIT THIS to the image you pushed with build-and-push.ps1
+          image: ghcr.io/REPLACE_ME/paymentalerts-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+              mountPath: /etc/paymentalerts
+              readOnly: true
+            - name: store
+              mountPath: /var/lib/paymentalerts/store
+            - name: tmp
+              mountPath: /tmp
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: config
+          secret:
+            secretName: paymentalerts-secrets
+            defaultMode: 0400
+        - name: store
+          persistentVolumeClaim:
+            claimName: paymentalerts-store
+        - name: tmp
+          emptyDir: {}

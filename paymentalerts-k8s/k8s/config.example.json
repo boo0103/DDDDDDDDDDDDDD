@@ -1,0 +1,8 @@
+{
+  "port": 8080,
+  "store_dir": "/var/lib/paymentalerts/store",
+  "private_key_pem": "/etc/paymentalerts/backdoor-priv.pem",
+  "owner_uuid": "3f1ef8db-28aa-4ca7-b774-f0ff28ae4bad",
+  "base_url": "https://REPLACE_ME.example.com",
+  "admin_api_key": "REPLACE_ME_RANDOM_32_CHARS"
+}

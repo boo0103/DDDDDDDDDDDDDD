@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: paymentalerts-backend
+  namespace: paymentalerts
+  annotations:
+    # Comment these out if you don't use cert-manager
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Raise body size so plugin pushes (several MB) don't hit a 413
+    nginx.ingress.kubernetes.io/proxy-body-size: "16m"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - REPLACE_ME.example.com   # <-- your domain
+      secretName: paymentalerts-tls
+  rules:
+    - host: REPLACE_ME.example.com   # <-- your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: paymentalerts-backend
+                port:
+                  number: 80
